@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage ('git checkout') {
             steps {
-                git url: 'https://github.com/ManideepKesham/spring-petclinic.git',
+                git url: 'https://github.com/Ramana-Kandi/spring-petclinic.git',
                     branch: 'main'
             }
         }
@@ -15,8 +15,8 @@ pipeline {
                 withCredentials([string(credentialsId: 'sonar_id',variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('sonar'){
                         sh '''mvn clean package sonar:sonar \
-                              -Dsonar.projectKey=ManideepKesham_spring-petclinic \
-                              -Dsonar.organization=manideepkesham \
+                              -Dsonar.projectKey=Ramana-Kandi_spring-petclinic \
+                              -Dsonar.organization=Ramana \
                               -Dsonar.host.url=https://sonarcloud.io \
                               -Dsonar.login=$SONAR_TOKEN'''
                     }
