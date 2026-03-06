@@ -1,26 +1,40 @@
 pipeline {
-    agent {label 'SPC'}
-    triggers {
-        pollSCM('* * * * *')
-    }
+    agent { label 'SPC' }
+    triggers { pollSCM('* * * * *') }
     stages {
-        stage ('git checkout') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/Ramana-Kandi/spring-petclinic.git',
-                    branch: 'main'
+                git url: 'https://github.com/Ramana-Kandi/spring-petclinic.git', branch: 'main'
             }
         }
-        stage ('build and checkout') {
+        stage('Build') {
             steps {
-                withCredentials([string(credentialsId: 'sonar_id',variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('SONAR'){
-                        sh '''mvn clean package sonar:sonar \
+                sh 'mvn clean package'
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar_id', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SONAR') {
+                        sh '''mvn sonar:sonar \
                               -Dsonar.projectKey=Ramana-Kandi_spring-petclinic \
+                              -Dsonar.organization=ramana \
                               -Dsonar.host.url=https://sonarcloud.io \
                               -Dsonar.login=$SONAR_TOKEN'''
                     }
                 }
             }
         }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+    post {
+        always { echo 'Pipeline finished' }
+        failure { echo 'Pipeline failed' }
     }
 }
