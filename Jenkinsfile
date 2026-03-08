@@ -32,6 +32,22 @@ pipeline {
                 }
             }
         }
+        stage('binary file store') {
+            steps {
+                rtupload (
+                    serviceId: 'JFROG',
+                    spec: '''{
+                        "files": [
+                            {
+                                "pattern": "target/*.jar",
+                                "target": "spcjava-spc"
+                            }
+                        ]
+                    }'''
+                )
+                rtpublishbuildInfo(serverId: 'JFROG')
+            }
+        }
     }
     post {
         always { echo 'Pipeline finished' }
