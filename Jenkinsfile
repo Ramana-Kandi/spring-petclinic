@@ -1,6 +1,8 @@
 pipeline {
     agent { label 'SPC' }
-    triggers { pollSCM('* * * * *') }
+    parameters {
+        choice(name: 'GOALS', choices: ['package', 'clean install', 'verify'], description: 'Pick something')
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -16,7 +18,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar_id', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SONAR') {
-                        sh '''mvn sonar:sonar \
+                        sh '''mvn ${params.GOALS} sonar:sonar \
                               -Dsonar.projectKey=Ramana-Kandi_spring-petclinic \
                               -Dsonar.organization=ramana \
                               -Dsonar.host.url=https://sonarcloud.io \
